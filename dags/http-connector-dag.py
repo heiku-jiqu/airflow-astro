@@ -19,10 +19,10 @@ with DAG(
     catchup=False,
 ) as dag:
     t1 = SimpleHttpOperator(
+        http_conn_id="http_swapi",  # connection id that you setup in airflow
         task_id="http",
         endpoint="planets/1/",
         method="GET",
-        http_conn_id="http_swapi",
         log_response=True,
     )
     t2 = PythonOperator(task_id="print_uri", python_callable=my_uri)
