@@ -1,2 +1,3 @@
 airflow-astro-env/
 logs/
+**.pyc
