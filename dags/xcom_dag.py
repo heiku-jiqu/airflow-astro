@@ -27,8 +27,8 @@ with DAG(
 
         # push XCom key "character_info" with XCom value my_character
         ti.xcom_push("character_info", my_character)
-    
-    def _transform2(ti: TaskInstance);
+
+    def _transform2(ti: TaskInstance):
         import requests
 
         resp = requests.get("https://swapi.dev/api/people/1").json()
@@ -36,9 +36,7 @@ with DAG(
         my_character = {}
         my_character["height"] = int(resp["height"]) - 11
         my_character["mass"] = int(resp["mass"]) - 22
-        my_character["hair_color"] = (
-            "red" if resp["hair_color"] == "blond" else "brown"
-        )
+        my_character["hair_color"] = "red" if resp["hair_color"] == "blond" else "brown"
         my_character["eye_color"] = "green" if resp["eye_color"] == "blue" else "purple"
 
         # push XCom key "character_info" with XCom value my_character
@@ -49,7 +47,7 @@ with DAG(
         print(ti.xcom_pull(key="character_info", task_ids="transform"))
 
         # able to pull multiple XComs, will return a list of XCom values:
-        print(ti.xcom_ull(key="character_info", task_ids=["transform", "transform2"]))
+        print(ti.xcom_pull(key="character_info", task_ids=["transform", "transform2"]))
 
     t1 = PythonOperator(task_id="transform", python_callable=_transform)
     t2 = PythonOperator(task_id="transform2", python_callable=_transform2)
