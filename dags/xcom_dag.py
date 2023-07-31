@@ -49,8 +49,19 @@ with DAG(
         # able to pull multiple XComs, will return a list of XCom values:
         print(ti.xcom_pull(key="character_info", task_ids=["transform", "transform2"]))
 
+    def _load2(vals):
+        print(f"XCom passed in through function arg using templating: {vals}")
+
     t1 = PythonOperator(task_id="transform", python_callable=_transform)
     t2 = PythonOperator(task_id="transform2", python_callable=_transform2)
     t3 = PythonOperator(task_id="load", python_callable=_load)
+    t4 = PythonOperator(
+        task_id="load2",
+        python_callable=_load2,
+        # can use templating to pass in xcom as well
+        op_args=[
+            "{{ti.xcom_pull(key='character_info', task_ids=['transform','transform2'])}}"
+        ],
+    )
 
-    [t1, t2] >> t3
+    [t1, t2] >> t3 >> t4
