@@ -97,6 +97,10 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: "300mb"
 
   redis:
     image: redis:latest
@@ -109,6 +113,10 @@ services:
       retries: 50
       start_period: 30s
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: "100mb"
 
   airflow-webserver:
     <<: *airflow-common
@@ -184,6 +192,10 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    deploy:
+      resources:
+        limits:
+          memory: "500mb"
 
   airflow-init:
     <<: *airflow-common
