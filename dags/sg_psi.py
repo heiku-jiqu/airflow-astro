@@ -31,3 +31,6 @@ with DAG(
     )
 
     t1
+
+if __name__ == "__main__":
+    dag.test()
