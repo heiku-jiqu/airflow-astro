@@ -50,7 +50,7 @@ def temperature_readings():
 
         output_path = path.replace("json", "csv")
         print(f"writing to {output_path}")
-        joined_out.to_csv(output_path)
+        joined_out.to_csv(output_path, index=False)
 
         return output_path
 
