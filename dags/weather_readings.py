@@ -54,8 +54,20 @@ def temperature_readings():
 
         return output_path
 
+    @task
+    def get_statistics(path: str):
+        import pandas as pd
+
+        df = pd.read_csv(path)
+        assert df["items.timestamp"].nunique() == 1
+        print(
+            f"Temperature statistics for {df['items.timestamp'].loc[1]} is:\n",
+            df["value"].describe(),
+        )
+
     downloaded_json_path = download_current_readings()
     transformed_csv_path = transform_readings(downloaded_json_path)
+    get_statistics(transformed_csv_path)
 
 
 temperature_readings()
