@@ -81,9 +81,13 @@ x-airflow-common: &airflow-common
       condition: service_healthy
     postgres:
       condition: service_healthy
+x-restart-common: &airflow-restart
+  restart: unless-stopped
+
 
 services:
   postgres:
+    <<: *airflow-restart
     image: postgres:13
     environment:
       POSTGRES_USER: airflow
@@ -96,13 +100,13 @@ services:
       interval: 10s
       retries: 5
       start_period: 5s
-    restart: always
     deploy:
       resources:
         limits:
           memory: "300mb"
 
   redis:
+    <<: *airflow-restart
     image: redis:latest
     expose:
       - 6379
@@ -112,13 +116,13 @@ services:
       timeout: 30s
       retries: 50
       start_period: 30s
-    restart: always
     deploy:
       resources:
         limits:
           memory: "100mb"
 
   airflow-webserver:
+    <<: *airflow-restart
     <<: *airflow-common
     command: webserver
     ports:
@@ -129,13 +133,13 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
 
   airflow-scheduler:
+    <<: *airflow-restart
     <<: *airflow-common
     command: scheduler
     healthcheck:
@@ -144,13 +148,13 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
 
   airflow-worker:
+    <<: *airflow-restart
     <<: *airflow-common
     command: celery worker
     tmpfs:
@@ -168,13 +172,13 @@ services:
       # Required to handle warm shutdown of the celery workers properly
       # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
       DUMB_INIT_SETSID: "0"
-    restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
 
   airflow-triggerer:
+    <<: *airflow-restart
     <<: *airflow-common
     command: triggerer
     healthcheck:
@@ -187,7 +191,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -276,6 +279,7 @@ services:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
 
   airflow-cli:
+    <<: *airflow-restart
     <<: *airflow-common
     profiles:
       - debug
@@ -292,6 +296,7 @@ services:
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
   # See: https://docs.docker.com/compose/profiles/
   flower:
+    <<: *airflow-restart
     <<: *airflow-common
     command: celery flower
     profiles:
@@ -304,7 +309,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
